@@ -30,12 +30,12 @@ export const adminQuery = {
     return prisma.user.count({ where });
   },
   findUserById(id: string) {
-    return prisma.user.findUnique({ where: { id } });
+    return prisma.user.findUnique({
+      where: { id },
+      select: { id: true, role: true, status: true },
+    });
   },
-  updateUserStatus(
-    userId: string,
-    status: "ACTIVE" | "PENDING" | "SUSPENDED",
-  ) {
+  updateUserStatus(userId: string, status: "ACTIVE" | "PENDING" | "SUSPENDED") {
     return prisma.user.update({
       where: { id: userId },
       data: { status },

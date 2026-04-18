@@ -3,6 +3,9 @@ export const rentalQuery = {
     findRentalSpaceById(id) {
         return prisma.rentalSpace.findUnique({ where: { id } });
     },
+    findVendorByUserId(userId) {
+        return prisma.vendorProfile.findUnique({ where: { userId } });
+    },
     findVendorById(id) {
         return prisma.vendorProfile.findUnique({ where: { id } });
     },

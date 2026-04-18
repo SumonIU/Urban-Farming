@@ -1,3 +1,4 @@
+import { UserRole } from "../../constants/roles.js";
 import { AppError } from "../../utils/appError.js";
 import { bookingSchema, rentalSpaceSchema } from "./validator.js";
 import { rentalQuery } from "./query.js";
@@ -20,14 +21,29 @@ export class RentalService {
         ]);
         return { items, total };
     }
-    static async createRentalSpace(body) {
+    static async createRentalSpace(body, requester) {
         const validatedData = rentalSpaceSchema.parse(body);
-        const vendor = await rentalQuery.findVendorById(validatedData.vendorId);
+        let vendorId = validatedData.vendorId;
+        if (requester.role === UserRole.VENDOR) {
+            const ownVendor = await rentalQuery.findVendorByUserId(requester.id);
+            if (!ownVendor) {
+                throw new AppError(403, "Vendor profile not found for user");
+            }
+            vendorId = ownVendor.id;
+        }
+        if (requester.role === UserRole.ADMIN && !vendorId) {
+            throw new AppError(400, "vendorId is required for admin actions");
+        }
+        if (!vendorId) {
+            throw new AppError(403, "Vendor access required");
+        }
+        const vendor = await rentalQuery.findVendorById(vendorId);
         if (!vendor) {
             throw new AppError(404, "Vendor not found");
         }
         return rentalQuery.createRentalSpace({
             ...validatedData,
+            vendorId: vendorId,
             availability: "AVAILABLE",
         });
     }

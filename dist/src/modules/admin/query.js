@@ -29,7 +29,10 @@ export const adminQuery = {
         return prisma.user.count({ where });
     },
     findUserById(id) {
-        return prisma.user.findUnique({ where: { id } });
+        return prisma.user.findUnique({
+            where: { id },
+            select: { id: true, role: true, status: true },
+        });
     },
     updateUserStatus(userId, status) {
         return prisma.user.update({

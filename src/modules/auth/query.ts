@@ -5,7 +5,10 @@ export const authQuery = {
     return prisma.user.findUnique({ where: { email } });
   },
   findUserById(id: string) {
-    return prisma.user.findUnique({ where: { id } });
+    return prisma.user.findUnique({
+      where: { id },
+      select: { id: true, email: true, role: true, status: true },
+    });
   },
   findUserForLogin(email: string) {
     return prisma.user.findUnique({

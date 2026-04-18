@@ -12,7 +12,10 @@ export const listRentalSpaces = asyncHandler(async (req, res) => {
     });
 });
 export const createRentalSpace = asyncHandler(async (req, res) => {
-    const rentalSpace = await RentalService.createRentalSpace(req.body);
+    const rentalSpace = await RentalService.createRentalSpace(req.body, {
+        id: req.user.id,
+        role: req.user.role,
+    });
     res.status(201);
     return sendSuccess(res, { rentalSpace }, "Rental space created");
 });

@@ -6,7 +6,7 @@ export const paginationSchema = z.object({
     status: z.string().optional(),
 });
 export const rentalSpaceSchema = z.object({
-    vendorId: z.string(),
+    vendorId: z.string().optional(),
     location: z.string().min(2),
     size: z.string().min(1),
     price: z.coerce.number().positive(),

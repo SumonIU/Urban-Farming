@@ -3,17 +3,46 @@ export const vendorQuery = {
     findVendorById(id) {
         return prisma.vendorProfile.findUnique({ where: { id } });
     },
+    findVendorByUserId(userId) {
+        return prisma.vendorProfile.findUnique({ where: { userId } });
+    },
     findVendorWithUser(id) {
         return prisma.vendorProfile.findUnique({
             where: { id },
-            include: { user: true },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        status: true,
+                    },
+                },
+            },
         });
     },
     listVendorsDetailed() {
         return prisma.vendorProfile.findMany({
             include: {
                 user: { select: { id: true, name: true, email: true } },
-                sustainabilityCerts: true,
+                sustainabilityCerts: {
+                    select: {
+                        id: true,
+                        certifyingAgency: true,
+                        certificationDate: true,
+                        status: true,
+                        createdAt: true,
+                        updatedAt: true,
+                    },
+                },
+            },
+        });
+    },
+    listVendorsBasic() {
+        return prisma.vendorProfile.findMany({
+            include: {
+                user: { select: { id: true, name: true } },
             },
         });
     },

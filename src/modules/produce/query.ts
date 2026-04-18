@@ -7,8 +7,22 @@ export const produceQuery = {
   findProduceByIdWithVendor(id: string) {
     return prisma.produce.findUnique({
       where: { id },
-      include: { vendor: true },
+      include: {
+        vendor: {
+          select: {
+            id: true,
+            farmName: true,
+            farmLocation: true,
+            certificationStatus: true,
+            isApproved: true,
+            user: { select: { id: true, name: true } },
+          },
+        },
+      },
     });
+  },
+  findVendorByUserId(userId: string) {
+    return prisma.vendorProfile.findUnique({ where: { userId } });
   },
   findVendorById(id: string) {
     return prisma.vendorProfile.findUnique({ where: { id } });

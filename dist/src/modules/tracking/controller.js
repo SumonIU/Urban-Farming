@@ -17,7 +17,10 @@ export const createPlant = asyncHandler(async (req, res) => {
     return sendSuccess(res, { plant }, "Plant tracked");
 });
 export const addPlantUpdate = asyncHandler(async (req, res) => {
-    const update = await TrackingService.addPlantUpdate(req.params.id, req.body);
+    const update = await TrackingService.addPlantUpdate(req.params.id, req.body, {
+        id: req.user.id,
+        role: req.user.role,
+    });
     socketInstance?.emit("plant:update", {
         plantId: req.params.id,
         update,

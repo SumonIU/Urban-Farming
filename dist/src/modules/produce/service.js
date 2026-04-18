@@ -1,3 +1,4 @@
+import { UserRole } from "../../constants/roles.js";
 import { AppError } from "../../utils/appError.js";
 import { produceQuery } from "./query.js";
 import { produceSchema } from "./validator.js";
@@ -13,13 +14,32 @@ export class ProduceService {
         ]);
         return { items, total };
     }
-    static async createProduce(body) {
+    static async createProduce(body, requester) {
         const validatedData = produceSchema.parse(body);
-        const vendor = await produceQuery.findVendorById(validatedData.vendorId);
+        let vendorId = validatedData.vendorId;
+        if (requester.role === UserRole.VENDOR) {
+            const ownVendor = await produceQuery.findVendorByUserId(requester.id);
+            if (!ownVendor) {
+                throw new AppError(403, "Vendor profile not found for user");
+            }
+            vendorId = ownVendor.id;
+        }
+        if (requester.role === UserRole.ADMIN) {
+            if (!vendorId) {
+                throw new AppError(400, "vendorId is required for admin actions");
+            }
+        }
+        if (!vendorId) {
+            throw new AppError(403, "Vendor access required");
+        }
+        const vendor = await produceQuery.findVendorById(vendorId);
         if (!vendor) {
             throw new AppError(404, "Vendor not found");
         }
-        return produceQuery.createProduce(validatedData);
+        return produceQuery.createProduce({
+            ...validatedData,
+            vendorId,
+        });
     }
     static async getProduce(id) {
         const produce = await produceQuery.findProduceByIdWithVendor(id);
@@ -28,17 +48,30 @@ export class ProduceService {
         }
         return produce;
     }
-    static async updateProduce(id, body) {
+    static async updateProduce(id, body, requester) {
         const existing = await produceQuery.findProduceById(id);
         if (!existing) {
             throw new AppError(404, "Produce not found");
         }
-        return produceQuery.updateProduce(id, body);
+        if (requester.role !== UserRole.ADMIN) {
+            const ownVendor = await produceQuery.findVendorByUserId(requester.id);
+            if (!ownVendor || ownVendor.id !== existing.vendorId) {
+                throw new AppError(403, "You can only update your own produce");
+            }
+        }
+        const { vendorId: _vendorId, ...safeBody } = body;
+        return produceQuery.updateProduce(id, safeBody);
     }
-    static async deleteProduce(id) {
+    static async deleteProduce(id, requester) {
         const existing = await produceQuery.findProduceById(id);
         if (!existing) {
             throw new AppError(404, "Produce not found");
+        }
+        if (requester.role !== UserRole.ADMIN) {
+            const ownVendor = await produceQuery.findVendorByUserId(requester.id);
+            if (!ownVendor || ownVendor.id !== existing.vendorId) {
+                throw new AppError(403, "You can only delete your own produce");
+            }
         }
         await produceQuery.deleteProduce(id);
     }

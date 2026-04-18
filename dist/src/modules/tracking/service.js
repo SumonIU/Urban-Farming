@@ -1,3 +1,4 @@
+import { UserRole } from "../../constants/roles.js";
 import { AppError } from "../../utils/appError.js";
 import { trackingQuery } from "./query.js";
 import { plantSchema, plantUpdateSchema } from "./validator.js";
@@ -29,11 +30,14 @@ export class TrackingService {
             vendorId: validatedData.vendorId,
         });
     }
-    static async addPlantUpdate(plantId, body) {
+    static async addPlantUpdate(plantId, body, requester) {
         const validatedData = plantUpdateSchema.parse(body);
         const plant = await trackingQuery.findPlantById(plantId);
         if (!plant) {
             throw new AppError(404, "Plant not found");
+        }
+        if (requester.role !== UserRole.ADMIN && plant.userId !== requester.id) {
+            throw new AppError(403, "You can only update your own plants");
         }
         const update = await trackingQuery.createPlantUpdate({
             plantId,

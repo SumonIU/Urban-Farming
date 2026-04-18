@@ -8,7 +8,7 @@ export const paginationSchema = z.object({
 });
 
 export const produceSchema = z.object({
-  vendorId: z.string(),
+  vendorId: z.string().optional(),
   name: z.string().min(2),
   description: z.string().min(5),
   price: z.coerce.number().positive(),

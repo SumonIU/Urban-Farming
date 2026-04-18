@@ -8,7 +8,15 @@ export const trackingQuery = {
       take: limit,
       include: {
         updates: { orderBy: { createdAt: "desc" } },
-        vendor: true,
+        vendor: {
+          select: {
+            id: true,
+            farmName: true,
+            farmLocation: true,
+            certificationStatus: true,
+            isApproved: true,
+          },
+        },
       },
     });
   },

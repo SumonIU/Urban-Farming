@@ -38,6 +38,10 @@ export const addPlantUpdate = asyncHandler(async (req, res) => {
   const update = await TrackingService.addPlantUpdate(
     req.params.id as string,
     req.body,
+    {
+      id: req.user!.id,
+      role: req.user!.role,
+    },
   );
 
   socketInstance?.emit("plant:update", {
