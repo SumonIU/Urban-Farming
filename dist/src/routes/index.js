@@ -1,0 +1,18 @@
+import { Router } from "express";
+import { authRouter } from "../modules/auth/routes.js";
+import { vendorRouter } from "../modules/vendor/routes.js";
+import { produceRouter } from "../modules/produce/routes.js";
+import { rentalRouter } from "../modules/rental/routes.js";
+import { orderRouter } from "../modules/order/routes.js";
+import { communityRouter } from "../modules/community/routes.js";
+import { trackingRouter } from "../modules/tracking/routes.js";
+import { adminRouter } from "../modules/admin/routes.js";
+export const apiRouter = Router();
+apiRouter.use("/auth", authRouter);
+apiRouter.use("/vendors", vendorRouter);
+apiRouter.use("/produce", produceRouter);
+apiRouter.use("/rental-spaces", rentalRouter);
+apiRouter.use("/orders", orderRouter);
+apiRouter.use("/community-posts", communityRouter);
+apiRouter.use("/plants", trackingRouter);
+apiRouter.use("/admin", adminRouter);

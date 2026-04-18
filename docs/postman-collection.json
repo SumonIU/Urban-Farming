@@ -1,0 +1,443 @@
+{
+  "info": {
+    "name": "Urban Farming Platform API",
+    "_postman_id": "b2e8c5f0-1f7c-4cb9-8d0f-urban-farming",
+    "description": "Sample Postman collection for the Express + Prisma urban farming backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Amina Rahman\",\n  \"email\": \"amina@example.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"CUSTOMER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.data && json.data.token) {",
+                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@urbanfarm.local\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vendors",
+      "item": [
+        {
+          "name": "List Vendors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const vendors = json && json.data && json.data.vendors;",
+                  "if (Array.isArray(vendors) && vendors.length > 0 && vendors[0].id) {",
+                  "  pm.collectionVariables.set('vendorId', vendors[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/vendors",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendors"]
+            }
+          }
+        },
+        {
+          "name": "Approve Vendor",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/vendors/{{vendorId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendors", "{{vendorId}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Submit Certification",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certifyingAgency\": \"Metro Organic Council\",\n  \"certificationDate\": \"2026-04-18T00:00:00.000Z\",\n  \"documentUrl\": \"https://example.com/certificates/vendor-1.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vendors/{{vendorId}}/certifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendors", "{{vendorId}}", "certifications"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Produce",
+      "item": [
+        {
+          "name": "List Produce",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const items = json && json.data && json.data.items;",
+                  "if (Array.isArray(items) && items.length > 0 && items[0].id) {",
+                  "  pm.collectionVariables.set('produceId', items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/produce?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["produce"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Produce",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"{{vendorId}}\",\n  \"name\": \"Organic Lettuce\",\n  \"description\": \"Fresh hydroponic lettuce\",\n  \"price\": 4.5,\n  \"category\": \"Vegetables\",\n  \"availableQuantity\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/produce",
+              "host": ["{{baseUrl}}"],
+              "path": ["produce"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rentals",
+      "item": [
+        {
+          "name": "List Rental Spaces",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const items = json && json.data && json.data.items;",
+                  "if (Array.isArray(items) && items.length > 0) {",
+                  "  const available = items.find((x) => x && x.availability === 'AVAILABLE');",
+                  "  const target = available || items[0];",
+                  "  if (target && target.id) pm.collectionVariables.set('rentalSpaceId', target.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/rental-spaces?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["rental-spaces"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Rental Space",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"{{vendorId}}\",\n  \"location\": \"Zone 1, Metro City\",\n  \"size\": \"20 sqm\",\n  \"price\": 50,\n  \"availability\": \"AVAILABLE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rental-spaces",
+              "host": ["{{baseUrl}}"],
+              "path": ["rental-spaces"]
+            }
+          }
+        },
+        {
+          "name": "Book Rental Space",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2026-05-01T00:00:00.000Z\",\n  \"endDate\": \"2026-06-01T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rental-spaces/{{rentalSpaceId}}/book",
+              "host": ["{{baseUrl}}"],
+              "path": ["rental-spaces", "{{rentalSpaceId}}", "book"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"produceId\": \"{{produceId}}\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Community",
+      "item": [
+        {
+          "name": "List Posts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/community-posts?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["community-posts"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postContent\": \"Use compost tea to strengthen leafy greens.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/community-posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["community-posts"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plants",
+      "item": [
+        {
+          "name": "List Plants",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/plants?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["plants"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Track Plant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const plant = json && json.data && json.data.plant;",
+                  "if (plant && plant.id) {",
+                  "  pm.collectionVariables.set('plantId', plant.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"{{vendorId}}\",\n  \"plantName\": \"Tomato Patch\",\n  \"species\": \"Tomato\",\n  \"expectedHarvest\": \"2026-05-10T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plants",
+              "host": ["{{baseUrl}}"],
+              "path": ["plants"]
+            }
+          }
+        },
+        {
+          "name": "Add Plant Update",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Leaves are healthy after watering.\",\n  \"healthStatus\": \"GOOD\",\n  \"growthStage\": \"Vegetative\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plants/{{plantId}}/updates",
+              "host": ["{{baseUrl}}"],
+              "path": ["plants", "{{plantId}}", "updates"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api" },
+    { "key": "token", "value": "" },
+    { "key": "vendorId", "value": "" },
+    { "key": "produceId", "value": "" },
+    { "key": "rentalSpaceId", "value": "" },
+    { "key": "plantId", "value": "" }
+  ]
+}

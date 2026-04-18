@@ -1,0 +1,11 @@
+import { Router } from "express";
+import { approveVendor, createCertification, listVendors, reviewCertification, } from "../controllers/vendor.controller.js";
+import { authenticate, adminOnly, vendorOrAdmin } from "../middleware/auth.js";
+import { sensitiveRateLimit } from "../middleware/rateLimit.js";
+import { validateBody } from "../middleware/validate.js";
+import { certSchema } from "../validators/schemas.js";
+export const vendorRouter = Router();
+vendorRouter.get("/", authenticate, listVendors);
+vendorRouter.patch("/:id/approve", authenticate, adminOnly, approveVendor);
+vendorRouter.post("/:vendorId/certifications", authenticate, vendorOrAdmin, sensitiveRateLimit, validateBody(certSchema), createCertification);
+vendorRouter.patch("/certifications/:id/review", authenticate, adminOnly, reviewCertification);

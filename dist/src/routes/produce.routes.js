@@ -1,0 +1,11 @@
+import { Router } from "express";
+import { createProduce, deleteProduce, getProduce, listProduce, updateProduce, } from "../modules/produce/controller.js";
+import { authenticate, vendorOrAdmin } from "../middleware/auth.js";
+import { validateBody, validateQuery } from "../middleware/validate.js";
+import { paginationSchema, produceSchema } from "../modules/produce/validator.js";
+export const produceRouter = Router();
+produceRouter.get("/", validateQuery(paginationSchema), listProduce);
+produceRouter.get("/:id", getProduce);
+produceRouter.post("/", authenticate, vendorOrAdmin, validateBody(produceSchema), createProduce);
+produceRouter.patch("/:id", authenticate, vendorOrAdmin, validateBody(produceSchema.partial()), updateProduce);
+produceRouter.delete("/:id", authenticate, vendorOrAdmin, deleteProduce);
